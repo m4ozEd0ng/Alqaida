@@ -163,7 +163,7 @@ while run:
 
     clock.tick(fps)
 
-    #draw background
+    #draw ackground
     screen.blit(bg, (0,0))
     plane_group.draw(screen)
     plane_group.update()
