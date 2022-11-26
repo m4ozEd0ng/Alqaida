@@ -209,7 +209,7 @@ while run:
         #draw and scroll the ground
         ground_scroll -= scroll_speed
         if abs(ground_scroll) > 864:
-            ground_scroll = 20
+            ground_scroll = 21
 
         pipe_group.update()
 
