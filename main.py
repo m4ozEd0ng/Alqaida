@@ -91,6 +91,8 @@ class FightPlane(pygame.sprite.Sprite):
         self.vel = 0
         self.clicked = False
 
+    def create_bullet():
+        return Bullet(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
     def update(self):
 
         if flying == True:
@@ -104,9 +106,7 @@ class FightPlane(pygame.sprite.Sprite):
         if game_over == False:
             #jump
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_LSHIFT] and self.clicked == False:
-                self.clicked = True
-                self.vel = -8
+            self.rect.center = pygame.mouse.get_pos()
             if pygame.mouse.get_pressed()[0] == 0:
                 self.clicked = False
 
@@ -120,13 +120,16 @@ class FightPlane(pygame.sprite.Sprite):
                 if self.index >= len(self.images):
                     self.index = 0
             self.image = self.images[self.index]
+        
 
-            #rotate the bird
-            self.image = pygame.transform.rotate(self.images[self.index], self.vel * -2)
-        else:
-            self.image = pygame.transform.rotate(self.images[self.index], -90)
-
-
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self,pos_x,pos_y):
+        super().__init__()
+        self.image=pygame.Surface((50,10))
+        self.image.fill((255,0,0))
+        self.rect = self.image.get_rect(center = (pos_x,pos_y))
+    def update(self):
+        self.rect.x += 15
 
 class Pipe(pygame.sprite.Sprite):
     def __init__(self, x, y, position):
@@ -149,13 +152,13 @@ class Pipe(pygame.sprite.Sprite):
 bird_group = pygame.sprite.Group()
 plane_group = pygame.sprite.Group()
 pipe_group = pygame.sprite.Group()
-
+bullet_group = pygame.sprite.Group()
 flappy = Bird(550, int(screen_height / 2))
 F16 = FightPlane(100, int(screen_height / 2))
 
 bird_group.add(flappy)
 plane_group.add(F16)
-
+pygame.mouse.set_visible(False)
 
 
 run = True
@@ -176,6 +179,12 @@ while run:
 
     #look for collision
     if pygame.sprite.groupcollide(bird_group, pipe_group, False, False) or flappy.rect.top < 0:
+        game_over = True
+
+    if pygame.sprite.groupcollide(bullet_group, bird_group, True,True):
+        game_over = True
+    
+    if pygame.sprite.groupcollide(plane_group,pipe_group,False,False):
         game_over = True
 
     #check if bird has hit the ground
@@ -200,7 +209,7 @@ while run:
         #draw and scroll the ground
         ground_scroll -= scroll_speed
         if abs(ground_scroll) > 864:
-            ground_scroll = 20
+            ground_scroll = 21
 
         pipe_group.update()
 
@@ -209,6 +218,12 @@ while run:
             run = False
         if event.type == pygame.MOUSEBUTTONDOWN and flying == False and game_over == False:
             flying = True
+        if event.type == pygame.MOUSEBUTTONDOWN and flying == True and game_over == False:
+             bullet_group.add(FightPlane.create_bullet())
+
+    bullet_group.draw(screen)
+    plane_group.update()
+    bullet_group.update() 
 
     pygame.display.update()
 
